@@ -4,6 +4,7 @@
 
 [![Validate](https://github.com/karliklukas/ha-elco-remocon/actions/workflows/validate.yml/badge.svg)](https://github.com/karliklukas/ha-elco-remocon/actions/workflows/validate.yml)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Unofficial, **read-only** Home Assistant integration for ELCO heat pumps connected to the
 **Remocon-Net** cloud (Ariston group, **GALEVO** controller family – e.g. *AEROTOP MONO.2* with
@@ -83,8 +84,11 @@ Entity IDs start with `sensor.tepelne_cerpadlo_` / `binary_sensor.tepelne_cerpad
 
 ## Dashboard example
 
-Gauges below use [Modern Circular Gauge](https://github.com/selvalt7/modern-circular-gauge)
-(HACS) – the set-point is shown as a dot on the ring:
+![Room and hot-water gauges](docs/gauges.png)
+
+Two gauges made with [Modern Circular Gauge](https://github.com/selvalt7/modern-circular-gauge)
+(HACS). The outer ring is the measured temperature, the **inner ring is the set-point** and its
+value is shown under the main value as *Cíl* (target):
 
 ```yaml
 type: custom:modern-circular-gauge
@@ -92,18 +96,63 @@ entity: sensor.tepelne_cerpadlo_teplota_v_mistnosti
 name: Místnost
 min: 15
 max: 28
+unit: °C
 decimals: 1
+gauge_type: standard
+header_position: bottom
+needle: false
 segments:
   - from: 15
     color: [11, 182, 239]
-  - from: 19
+  - from: 21
     color: [76, 175, 80]
   - from: 24
     color: [255, 152, 0]
 secondary:
   entity: sensor.tepelne_cerpadlo_pozadovana_teplota_mistnosti
-  show_gauge: outer
+  show_gauge: inner
   label: Cíl
+  unit: °C
+  decimals: 1
+  min: 15
+  max: 28
+  state_size: small
+grid_options:
+  columns: 6
+  rows: 4
+```
+
+```yaml
+type: custom:modern-circular-gauge
+entity: sensor.tepelne_cerpadlo_teplota_zasobniku_tv
+name: Teplá voda
+min: 30
+max: 65
+unit: °C
+decimals: 1
+gauge_type: standard
+header_position: bottom
+needle: false
+adaptive_state_color: false
+segments:
+  - from: 30
+    color: [11, 182, 239]
+  - from: 46
+    color: [76, 175, 80]
+  - from: 56
+    color: [255, 152, 0]
+secondary:
+  entity: sensor.tepelne_cerpadlo_pozadovana_teplota_tv
+  show_gauge: inner
+  label: Cíl
+  unit: °C
+  decimals: 1
+  min: 30
+  max: 65
+  state_size: small
+grid_options:
+  columns: 6
+  rows: 4
 ```
 
 Real and requested flow temperature in one tile – a template helper
@@ -154,6 +203,10 @@ The tests cover the HA-independent parts (API client against a fake cloud, value
 CI runs the HACS validation, hassfest and the tests on every push.
 
 Releases follow the `version` in `manifest.json` (`vX.Y.Z` tags). HACS offers updates per release.
+
+## License
+
+[MIT](LICENSE) © 2026 Lukas Karlik
 
 ---
 
