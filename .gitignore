@@ -1,0 +1,8 @@
+# probe results contain account / location data - never commit
+probe*.json
+*.har
+__pycache__/
+*.pyc
+.venv/
+.idea/
+.vscode/

@@ -1,0 +1,47 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Remocon-Net account",
+        "description": "Read-only access to an ELCO heat pump via the Remocon-Net cloud. Use the same e-mail and password as in the Remocon-Net app.",
+        "data": {
+          "username": "E-mail",
+          "password": "Password",
+          "api_url": "API URL"
+        }
+      },
+      "plant": {
+        "title": "Select device",
+        "data": {
+          "gateway": "Device"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "Enter the current Remocon-Net password for {username}.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid e-mail or password.",
+      "cannot_connect": "Cannot connect to the Remocon-Net cloud.",
+      "no_plants": "No device found in this account."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    }
+  }
+}

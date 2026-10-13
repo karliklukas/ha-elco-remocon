@@ -1,0 +1,47 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Účet Remocon-Net",
+        "description": "Přístup jen pro čtení k tepelnému čerpadlu ELCO přes cloud Remocon-Net. Zadejte stejný e-mail a heslo jako v aplikaci Remocon-Net.",
+        "data": {
+          "username": "E-mail",
+          "password": "Heslo",
+          "api_url": "Adresa API"
+        }
+      },
+      "plant": {
+        "title": "Výběr zařízení",
+        "data": {
+          "gateway": "Zařízení"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Nové přihlášení",
+        "description": "Zadejte aktuální heslo do Remocon-Net pro {username}.",
+        "data": {
+          "password": "Heslo"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Neplatný e-mail nebo heslo.",
+      "cannot_connect": "Nelze se připojit ke cloudu Remocon-Net.",
+      "no_plants": "V účtu nebylo nalezeno žádné zařízení."
+    },
+    "abort": {
+      "already_configured": "Toto zařízení už je nastavené.",
+      "reauth_successful": "Přihlášení bylo obnoveno."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Nastavení",
+        "data": {
+          "scan_interval": "Interval aktualizace (sekundy)"
+        }
+      }
+    }
+  }
+}
