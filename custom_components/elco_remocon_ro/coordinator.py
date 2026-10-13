@@ -17,6 +17,8 @@ from .const import CULTURE, DEFAULT_SCAN_INTERVAL, DOMAIN, MENU_IDS, CONF_SCAN_I
 
 _LOGGER = logging.getLogger(__name__)
 
+MAX_TOLERATED_FAILURES = 3  # failed polls in a row that still show the previous values (~6 min at 120 s)
+
 
 @dataclass
 class RemoconData:
@@ -47,6 +49,7 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
         self.gateway = gateway
         self.features: dict[str, Any] | None = None
         self.plant: dict[str, Any] = {}
+        self._failures = 0  # consecutive failed updates
 
     @property
     def zones(self) -> list[int]:
@@ -84,5 +87,14 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
         except RemoconRateLimited as err:
             raise UpdateFailed(f"Cloud rate limit (HTTP 429): {err}") from err
         except RemoconError as err:
+            # the gateway sometimes fails a single read ("Gateway error ... InternalError");
+            # keep showing the last values for a few polls instead of making everything unavailable
+            self._failures += 1
+            if self.data is not None and self._failures <= MAX_TOLERATED_FAILURES:
+                _LOGGER.warning(
+                    "Update failed (%s/%s), keeping previous values: %s", self._failures, MAX_TOLERATED_FAILURES, err
+                )
+                return self.data
             raise UpdateFailed(str(err)) from err
+        self._failures = 0
         return RemoconData(data_items=data_items, menu_items=menu_items)

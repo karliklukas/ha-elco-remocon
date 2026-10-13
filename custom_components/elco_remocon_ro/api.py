@@ -19,6 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_API_URL = "https://www.remocon-net.remotethermo.com/api/v2/"
 USER_AGENT = "RestSharp/106.11.7.0"  # the official app's client identifier, same as fustom/ariston
 TIMEOUT = aiohttp.ClientTimeout(total=30)
+RETRY_DELAY = 3  # seconds before the single retry after a server error
 
 
 class RemoconError(Exception):
@@ -87,6 +88,10 @@ class RemoconApi:
         if status in (401, 405):  # expired token
             _LOGGER.debug("Token rejected (HTTP %s), logging in again", status)
             await self.login()
+            status, data = await self._raw(method, path, body)
+        elif status >= 500:  # e.g. "Gateway error ... InternalError" - the gateway is often just busy
+            _LOGGER.debug("HTTP %s from %s, retrying once in %ss", status, path.split("?")[0], RETRY_DELAY)
+            await asyncio.sleep(RETRY_DELAY)
             status, data = await self._raw(method, path, body)
         if status != 200:
             raise RemoconError(f"{method} {path.split('?')[0]} failed (HTTP {status}): {str(data)[:200]}")

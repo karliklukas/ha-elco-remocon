@@ -15,6 +15,8 @@ class FakeCloud:
         self.expire_next = False
         self.menu_status = 200
         self.rate_limit = False
+        self.gateway_errors = 0  # how many next dataItems calls fail with a gateway error
+        self.data_calls = 0
 
     def app(self):
         app = web.Application()
@@ -40,6 +42,10 @@ class FakeCloud:
         return web.json_response([{"gwId": "GW1", "plantName": "TP"}])
 
     async def data_items(self, request):
+        self.data_calls += 1
+        if self.gateway_errors:
+            self.gateway_errors -= 1
+            return web.Response(status=500, text=":-( Gateway error from GW1 (Response code: InternalError)")
         if self.rate_limit:
             return web.Response(status=429, text="slow down")
         if self.expire_next or not self._authorized(request):
@@ -57,7 +63,8 @@ class FakeCloud:
 
 
 @pytest.fixture
-async def cloud():
+async def cloud(monkeypatch):
+    monkeypatch.setattr(api, "RETRY_DELAY", 0)
     fake = FakeCloud()
     runner = web.AppRunner(fake.app())
     await runner.setup()
@@ -85,6 +92,18 @@ async def test_expired_token_relogin(cloud):
     fake.expire_next = True
     items = await client.get_data_items("GW1", {}, [{"id": "IsHeatingPumpOn", "zn": 0}], "cs-CZ")
     assert "IsHeatingPumpOn@0" in items and fake.logins == 2
+
+
+async def test_gateway_error_retried_once(cloud):
+    fake, session, url = cloud
+    client = api.RemoconApi(session, "a@b.c", "good", url)
+    fake.gateway_errors = 1
+    items = await client.get_data_items("GW1", {}, [{"id": "IsHeatingPumpOn", "zn": 0}], "cs-CZ")
+    assert "IsHeatingPumpOn@0" in items and fake.data_calls == 2
+    fake.gateway_errors, fake.data_calls = 2, 0  # fails twice -> error after exactly one retry
+    with pytest.raises(api.RemoconError):
+        await client.get_data_items("GW1", {}, [{"id": "IsHeatingPumpOn", "zn": 0}], "cs-CZ")
+    assert fake.data_calls == 2
 
 
 async def test_bad_password(cloud):
