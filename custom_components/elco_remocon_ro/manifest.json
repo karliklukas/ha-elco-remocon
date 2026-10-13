@@ -3,11 +3,11 @@
   "name": "ELCO Remocon-Net (read-only)",
   "codeowners": ["@karliklukas"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["recorder"],
   "documentation": "https://github.com/karliklukas/ha-elco-remocon",
   "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/karliklukas/ha-elco-remocon/issues",
   "requirements": [],
-  "version": "0.1.2"
+  "version": "0.2.0"
 }

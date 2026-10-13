@@ -8,7 +8,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import DEFAULT_API_URL, RemoconApi
 from .const import CONF_API_URL, CONF_GATEWAY
-from .coordinator import RemoconConfigEntry, RemoconCoordinator
+from .coordinator import RemoconConfigEntry, RemoconCoordinator, RemoconEnergyCoordinator
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
@@ -23,6 +23,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: RemoconConfigEntry) -> b
     )
     coordinator = RemoconCoordinator(hass, entry, api, entry.data[CONF_GATEWAY])
     await coordinator.async_config_entry_first_refresh()
+    if (coordinator.features or {}).get("hasMetering"):
+        # EM20 consumption reports; a failure here must not block the rest of the integration
+        coordinator.energy = RemoconEnergyCoordinator(hass, entry, api, entry.data[CONF_GATEWAY])
+        await coordinator.energy.async_refresh()
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload))

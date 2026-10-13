@@ -23,4 +23,13 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: Remocon
         "features": async_redact_data(coordinator.features or {}, TO_REDACT),
         "plant": async_redact_data(coordinator.plant, TO_REDACT),
         "data": asdict(coordinator.data) if coordinator.data else None,
+        "energy": (
+            {
+                "bucket_end": energy.bucket_end.isoformat(),
+                "imported": energy.imported,
+                "sequences": {f"k{k}_p{p}": v for (k, p), v in energy.sequences.items()},
+            }
+            if coordinator.energy and (energy := coordinator.energy.data)
+            else None
+        ),
     }

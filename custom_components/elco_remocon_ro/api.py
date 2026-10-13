@@ -122,6 +122,10 @@ class RemoconApi:
         )
         return index_data_items(data)
 
+    async def get_consumption_sequences(self, gateway: str) -> Any:
+        """Energy consumption report series (EM20 meter) for heating, hot water and cooling."""
+        return await self._request("GET", f"remote/reports/{gateway}/consSequencesApi8?usages=Ch%2CDhw%2CCooling")
+
     async def get_menu_items(self, gateway: str, ids: list[int]) -> dict[int, dict[str, Any]]:
         """Read numbered service parameters.
 

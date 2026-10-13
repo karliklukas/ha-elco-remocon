@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 from typing import Any
 
@@ -11,9 +11,28 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import RemoconApi, RemoconAuthError, RemoconError, RemoconRateLimited
-from .const import CULTURE, DEFAULT_SCAN_INTERVAL, DOMAIN, MENU_IDS, CONF_SCAN_INTERVAL, data_item_request
+from .const import (
+    CONF_SCAN_INTERVAL,
+    CULTURE,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    ENERGY_SCAN_INTERVAL,
+    MENU_IDS,
+    data_item_request,
+)
+from .energy_stats import async_import_energy
+from .energy_values import (
+    PERIOD_BUCKETS,
+    SETTLE_MINUTES,
+    TYPE_CH,
+    TYPE_DHW,
+    index_sequences,
+    is_settled,
+    last_bucket_end,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +47,55 @@ class RemoconData:
     menu_items: dict[int, dict[str, Any]]  # number -> item
 
 
+@dataclass
+class EnergyData:
+    """EM20 consumption reports."""
+
+    sequences: dict[tuple[int, int], list[float]]  # (type, period) -> values
+    bucket_end: datetime  # end of the newest 2-hour bucket (local time)
+    imported: bool  # statistics written in this update
+
+
 type RemoconConfigEntry = ConfigEntry["RemoconCoordinator"]
+
+
+class RemoconEnergyCoordinator(DataUpdateCoordinator[EnergyData]):
+    """Polls the consumption reports (they change every 2 hours) and imports them into statistics."""
+
+    def __init__(self, hass: HomeAssistant, entry: RemoconConfigEntry, api: RemoconApi, gateway: str) -> None:
+        super().__init__(
+            hass,
+            _LOGGER,
+            config_entry=entry,
+            name=f"{DOMAIN} {gateway} energy",
+            update_interval=timedelta(seconds=ENERGY_SCAN_INTERVAL),
+        )
+        self.api = api
+        self.gateway = gateway
+
+    async def _async_update_data(self) -> EnergyData:
+        try:
+            raw = await self.api.get_consumption_sequences(self.gateway)
+        except RemoconAuthError as err:
+            raise ConfigEntryAuthFailed(str(err)) from err
+        except RemoconError as err:
+            if self.data is not None:
+                _LOGGER.warning("Reading consumption failed, keeping previous values: %s", err)
+                return self.data
+            raise UpdateFailed(str(err)) from err
+        sequences = index_sequences(raw)
+        now = dt_util.now()
+        bucket_end = last_bucket_end(now)
+        imported = False
+        if is_settled(now):
+            for kind in (TYPE_CH, TYPE_DHW):
+                buckets = sequences.get((kind, PERIOD_BUCKETS))
+                if buckets:
+                    await async_import_energy(self.hass, self.gateway, kind, buckets, bucket_end)
+                    imported = True
+        else:
+            _LOGGER.debug("Within %s min after a bucket boundary, statistics import postponed", SETTLE_MINUTES)
+        return EnergyData(sequences=sequences, bucket_end=bucket_end, imported=imported)
 
 
 class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
@@ -50,6 +117,7 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
         self.features: dict[str, Any] | None = None
         self.plant: dict[str, Any] = {}
         self._failures = 0  # consecutive failed updates
+        self.energy: RemoconEnergyCoordinator | None = None  # set in __init__.py when the plant has metering
 
     @property
     def zones(self) -> list[int]:

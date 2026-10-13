@@ -23,13 +23,15 @@ anything to the heat pump.**
 - **Water temperature from the heat pump** and **CH flow temperature** (real values, not only set-points)
 - Room temperature and **humidity**, DHW tank temperature, outdoor temperature (controller, heat pump sensor, online)
 - Set-points, system / zone / DHW / buffer modes, pressure, signal strength
+- **Electricity consumption** from the EM20 meter – heating and hot water separately, imported into
+  long-term statistics for the **Energy dashboard**, plus *yesterday* / *previous month* sensors
 - Config flow (UI), re-authentication, options (update interval), diagnostics
 - Robust polling: a failed gateway read is retried once and the last values are kept for up to
   3 failed polls in a row, so short cloud hiccups do not make everything *unavailable*
 
 ## Requirements
 
-- Home Assistant **2025.3** or newer (the brand icon is shown from **2026.3**)
+- Home Assistant **2025.11** or newer (the brand icon is shown from **2026.3**)
 - ELCO heat pump with a Remocon-Net gateway on the **GALEVO** platform – in the
   [Remocon-Net portal](https://www.remocon-net.remotethermo.com) the plant URL contains
   `/R2/Plant/Index/`. Plants with `/R2/BsbPlantDashboard/` (BSB family) are **not** supported
@@ -81,6 +83,37 @@ Entity IDs start with `sensor.tepelne_cerpadlo_` / `binary_sensor.tepelne_cerpad
 | Režim systému / zóny / TV / akumulace | text (localized by the cloud) | dataItems |
 | Tlak v systému | bar | dataItem `HeatingCircuitPressure` |
 | Posun topné křivky, HV vstup 1 – funkce, Síla signálu | diagnostic | dataItem / menuItems 303, 119 |
+| Spotřeba topení / TV včera, … minulý měsíc | kWh | consumption reports (EM20) |
+| Konec posledního úseku spotřeby | timestamp, diagnostic | consumption reports (EM20) |
+
+## Energy (EM20 meter)
+
+Plants with an EM20 energy meter (`hasMetering`) also get the electricity consumed by the heat pump,
+split into **heating** and **hot water**. The cloud publishes it only as reports, with a delay:
+
+| Report | Resolution | Used for |
+|---|---|---|
+| last 48 hours | 2-hour buckets (end at even hours) | long-term statistics, refreshed every 30 min |
+| last ~6 weeks | days, until yesterday | sensor *Spotřeba … včera* |
+| months | completed months | sensor *Spotřeba … minulý měsíc* |
+
+**Energy dashboard:** *Settings → Dashboards → Energy → Individual devices → Add device* and pick the
+statistics **Tepelné čerpadlo – topení (elektřina)** and **Tepelné čerpadlo – teplá voda (elektřina)**
+(`elco_remocon_ro:<gateway>_ch_electricity` / `_dhw_electricity`). Each 2-hour bucket is split evenly
+into its two hours, so the hourly view is approximate; daily and monthly totals are exact. Values
+appear with a delay of up to ~2.5 hours. History before the first import is not backfilled.
+
+- The first statistics rows appear up to ~45 minutes after installation (30-min poll, imports are
+  skipped during the first 15 minutes after a bucket boundary).
+- Reports are polled only while at least one of the energy entities is enabled – disabling all of
+  them also stops the statistics import.
+- *Spotřeba … včera* shows the last completed day the cloud has published; early in the morning it
+  may still show the day before.
+
+> The 2-hour buckets are assumed to be aligned to **local** time. This was verified in summer time only
+> (CEST, where local and UTC even hours coincide). The diagnostic sensor *Konec posledního úseku
+> spotřeby* shows the end of the newest bucket – after the switch to winter time it should keep
+> showing even local hours (e.g. 14:00, not 13:00 or 15:00).
 
 ## Dashboard example
 

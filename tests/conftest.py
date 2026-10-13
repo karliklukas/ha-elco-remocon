@@ -15,3 +15,4 @@ if PKG not in sys.modules:
 api = importlib.import_module(f"{PKG}.api")
 const = importlib.import_module(f"{PKG}.const")
 values = importlib.import_module(f"{PKG}.values")
+energy_values = importlib.import_module(f"{PKG}.energy_values")

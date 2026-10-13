@@ -13,6 +13,7 @@ CONF_PLANT_NAME = "plant_name"
 CONF_SCAN_INTERVAL = "scan_interval"
 
 DEFAULT_SCAN_INTERVAL = 120  # seconds
+ENERGY_SCAN_INTERVAL = 30 * 60  # consumption reports change every 2 hours
 MIN_SCAN_INTERVAL = 60
 CULTURE = "cs-CZ"  # dataItems enum texts come localized
 
