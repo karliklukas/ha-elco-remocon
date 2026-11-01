@@ -16,11 +16,11 @@ from homeassistant.util import dt as dt_util
 from .api import RemoconApi, RemoconAuthError, RemoconError, RemoconRateLimited
 from .const import (
     CONF_SCAN_INTERVAL,
-    CULTURE,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     ENERGY_SCAN_INTERVAL,
     MENU_IDS,
+    culture_for,
     data_item_request,
 )
 from .energy_stats import async_import_energy
@@ -138,7 +138,7 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
     async def _async_update_data(self) -> RemoconData:
         try:
             data_items = await self.api.get_data_items(
-                self.gateway, self.features or {}, data_item_request(self.zones), CULTURE
+                self.gateway, self.features or {}, data_item_request(self.zones), culture_for(self.hass.config.language)
             )
             try:
                 menu_items = await self.api.get_menu_items(self.gateway, MENU_IDS)

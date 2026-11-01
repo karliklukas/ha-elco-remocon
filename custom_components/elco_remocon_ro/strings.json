@@ -43,5 +43,160 @@
         }
       }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "hp_running": {
+        "name": "Heat pump running"
+      },
+      "dhw_heating_rod": {
+        "name": "Hot water heating rod"
+      },
+      "ch_backup_heater": {
+        "name": "Heating backup heater"
+      },
+      "dhw_boost": {
+        "name": "Hot water boost"
+      },
+      "quiet_mode": {
+        "name": "Quiet mode"
+      },
+      "heat_request": {
+        "name": "Heat request"
+      },
+      "holiday": {
+        "name": "Holiday"
+      },
+      "weather_compensation": {
+        "name": "Weather compensation"
+      },
+      "hv_input_1": {
+        "name": "HV input 1"
+      }
+    },
+    "sensor": {
+      "hp_mode": {
+        "name": "Heat pump mode",
+        "state": {
+          "off": "Off",
+          "standby": "Standby",
+          "cooling": "Cooling",
+          "heating": "Heating",
+          "heating_booster": "Heating with booster",
+          "cooling_booster": "Cooling with booster",
+          "test_heating": "Test heating",
+          "test_cooling": "Test cooling",
+          "frost_protection": "Frost protection",
+          "defrost": "Defrost",
+          "overheat_protection": "Overheat protection",
+          "compressor_delay": "Compressor time protection",
+          "system_fault": "System fault",
+          "severe_system_fault": "Severe system fault",
+          "refrigerant_pump_down": "Refrigerant pump-down",
+          "emergency": "Emergency mode",
+          "fan_test": "Fan test run",
+          "cascade_heating": "Cascade heating",
+          "cascade_cooling": "Cascade cooling"
+        }
+      },
+      "hp_water_temperature": {
+        "name": "Heat pump water temperature"
+      },
+      "ch_flow_temperature": {
+        "name": "Heating flow temperature"
+      },
+      "ch_flow_setpoint": {
+        "name": "Heating flow setpoint"
+      },
+      "system_pressure": {
+        "name": "System pressure"
+      },
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "outdoor_temperature_hp": {
+        "name": "Outdoor temperature (heat pump)"
+      },
+      "outdoor_temperature_online": {
+        "name": "Outdoor temperature (online)"
+      },
+      "room_temperature": {
+        "name": "Room temperature"
+      },
+      "room_humidity": {
+        "name": "Room humidity"
+      },
+      "room_target_temperature": {
+        "name": "Room target temperature"
+      },
+      "room_comfort_temperature": {
+        "name": "Room comfort temperature"
+      },
+      "room_economy_temperature": {
+        "name": "Room economy temperature"
+      },
+      "zone_mode": {
+        "name": "Zone mode"
+      },
+      "heating_curve_offset": {
+        "name": "Heating curve offset"
+      },
+      "dhw_tank_temperature": {
+        "name": "Hot water tank temperature"
+      },
+      "dhw_target_temperature": {
+        "name": "Hot water target temperature"
+      },
+      "dhw_comfort_temperature": {
+        "name": "Hot water comfort temperature"
+      },
+      "dhw_economy_temperature": {
+        "name": "Hot water economy temperature"
+      },
+      "dhw_mode": {
+        "name": "Hot water mode"
+      },
+      "plant_mode": {
+        "name": "System mode"
+      },
+      "buffer_mode": {
+        "name": "Buffer tank mode"
+      },
+      "buffer_comfort_temperature": {
+        "name": "Buffer comfort temperature"
+      },
+      "buffer_economy_temperature": {
+        "name": "Buffer economy temperature"
+      },
+      "hv_input_1_function": {
+        "name": "HV input 1 function",
+        "state": {
+          "undefined": "Not defined",
+          "unused": "Not used",
+          "edf": "EDF",
+          "sg_ready_1": "SG Ready 1",
+          "external_off": "External switch-off",
+          "pv_integration": "PV integration"
+        }
+      },
+      "signal_strength": {
+        "name": "Signal strength"
+      },
+      "ch_yesterday": {
+        "name": "Heating consumption yesterday"
+      },
+      "dhw_yesterday": {
+        "name": "Hot water consumption yesterday"
+      },
+      "ch_last_month": {
+        "name": "Heating consumption last month"
+      },
+      "dhw_last_month": {
+        "name": "Hot water consumption last month"
+      },
+      "bucket_end": {
+        "name": "End of the latest consumption interval"
+      }
+    }
   }
 }

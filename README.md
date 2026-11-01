@@ -13,7 +13,7 @@ rods on – together with the real flow, room and hot-water temperatures. **It n
 anything to the heat pump.**
 
 > Not affiliated with ELCO, Ariston or Remocon-Net. The cloud API is undocumented and may change
-> without notice. Entity names are in Czech.
+> without notice.
 
 ## Features
 
@@ -26,6 +26,8 @@ anything to the heat pump.**
 - **Electricity consumption** from the EM20 meter – heating and hot water separately, imported into
   long-term statistics for the **Energy dashboard**, plus *yesterday* / *previous month* sensors
 - Config flow (UI), re-authentication, options (update interval), diagnostics
+- **English, German and Czech** – entity names and states follow the Home Assistant language
+  (other languages fall back to English)
 - Robust polling: a failed gateway read is retried once and the last values are kept for up to
   3 failed polls in a row, so short cloud hiccups do not make everything *unavailable*
 
@@ -64,27 +66,36 @@ Copy `custom_components/elco_remocon_ro` into `<config>/custom_components/` and 
 
 ## Entities
 
-Entity IDs start with `sensor.tepelne_cerpadlo_` / `binary_sensor.tepelne_cerpadlo_` (device name *Tepelné čerpadlo*).
+The device is named after the Home Assistant language (*Heat pump* / *Wärmepumpe* / *Tepelné čerpadlo*),
+so entity IDs look like `sensor.heat_pump_room_temperature`. Names below are the English ones.
 
 | Entity | Type | Cloud source |
 |---|---|---|
-| TČ běží – heat pump running | binary | dataItem `IsHeatingPumpOn` |
-| Spirála teplé vody – DHW heating rod | binary | dataItem `IsResistorOn` |
-| Záložní spirála topení – CH backup heater | binary | menuItem 337 |
-| Boost TV, Tichý režim, Požadavek na teplo, Dovolená, Ekvitermní regulace | binary | dataItems |
-| HV vstup 1 – HV input 1 (SG Ready / PV) | binary, diagnostic | menuItem 304 |
-| Režim TČ – heat pump operating mode | text | menuItem 340 |
-| Teplota vody z TČ / Teplota výstupu topení | °C | menuItems 348 / 349 |
-| Požadovaná teplota výstupu | °C | dataItem `ChFlowSetpointTemp` |
-| Teplota v místnosti / Vlhkost v místnosti | °C / % | dataItem `ZoneMeasuredTemp` / menuItem 146 |
-| Teplota zásobníku TV | °C | dataItem `DhwStorageTemperature` |
-| Venkovní teplota (controller / TČ / online) | °C | dataItem `OutsideTemp` / menuItems 341, 130 *(online disabled by default)* |
-| Room, DHW and buffer comfort / economy set-points | °C | dataItems |
-| Režim systému / zóny / TV / akumulace | text (localized by the cloud) | dataItems |
-| Tlak v systému | bar | dataItem `HeatingCircuitPressure` |
-| Posun topné křivky, HV vstup 1 – funkce, Síla signálu | diagnostic | dataItem / menuItems 303, 119 |
-| Spotřeba topení / TV včera, … minulý měsíc | kWh | consumption reports (EM20) |
-| Konec posledního úseku spotřeby | timestamp, diagnostic | consumption reports (EM20) |
+| Heat pump running | binary | dataItem `IsHeatingPumpOn` |
+| Hot water heating rod | binary | dataItem `IsResistorOn` |
+| Heating backup heater | binary | menuItem 337 |
+| Hot water boost, Quiet mode, Heat request, Holiday, Weather compensation | binary | dataItems |
+| HV input 1 (SG Ready / PV) | binary, diagnostic | menuItem 304 |
+| Heat pump mode | enum (translated) | menuItem 340 |
+| Heat pump water temperature / Heating flow temperature | °C | menuItems 348 / 349 |
+| Heating flow setpoint | °C | dataItem `ChFlowSetpointTemp` |
+| Room temperature / Room humidity | °C / % | dataItem `ZoneMeasuredTemp` / menuItem 146 |
+| Hot water tank temperature | °C | dataItem `DhwStorageTemperature` |
+| Outdoor temperature (controller / heat pump / online) | °C | dataItem `OutsideTemp` / menuItems 341, 130 *(online disabled by default)* |
+| Room, hot water and buffer comfort / economy set-points | °C | dataItems |
+| System / zone / hot water / buffer tank mode | text (localized by the cloud) | dataItems |
+| System pressure | bar | dataItem `HeatingCircuitPressure` |
+| Heating curve offset, HV input 1 function, Signal strength | diagnostic | dataItem / menuItems 303, 119 |
+| Heating / hot water consumption yesterday, … last month | kWh | consumption reports (EM20) |
+| End of the latest consumption interval | timestamp, diagnostic | consumption reports (EM20) |
+
+### Upgrading from 0.2.x
+
+Since 0.3.0 the names come from translations. Existing entity IDs are kept, so dashboards keep working.
+**The states of *Heat pump mode* and *HV input 1 function* are now keys** (`heating`, `standby`,
+`defrost`, …) shown translated in the UI – automations or templates comparing them with the old Czech
+texts (`Topení`, `Pohotovost`, …) have to use the keys. The mode texts sent by the cloud
+(system / zone / hot water / buffer mode) now come in the Home Assistant language.
 
 ## Energy (EM20 meter)
 
@@ -94,11 +105,11 @@ split into **heating** and **hot water**. The cloud publishes it only as reports
 | Report | Resolution | Used for |
 |---|---|---|
 | last 48 hours | 2-hour buckets (end at even hours) | long-term statistics, refreshed every 30 min |
-| last ~6 weeks | days, until yesterday | sensor *Spotřeba … včera* |
-| months | completed months | sensor *Spotřeba … minulý měsíc* |
+| last ~6 weeks | days, until yesterday | sensors *… consumption yesterday* |
+| months | completed months | sensors *… consumption last month* |
 
 **Energy dashboard:** *Settings → Dashboards → Energy → Individual devices → Add device* and pick the
-statistics **Tepelné čerpadlo – topení (elektřina)** and **Tepelné čerpadlo – teplá voda (elektřina)**
+statistics **Heat pump – heating (electricity)** and **Heat pump – hot water (electricity)**
 (`elco_remocon_ro:<gateway>_ch_electricity` / `_dhw_electricity`). Each 2-hour bucket is split evenly
 into its two hours, so the hourly view is approximate; daily and monthly totals are exact. Values
 appear with a delay of up to ~2.5 hours. History before the first import is not backfilled.
@@ -107,13 +118,12 @@ appear with a delay of up to ~2.5 hours. History before the first import is not 
   skipped during the first 15 minutes after a bucket boundary).
 - Reports are polled only while at least one of the energy entities is enabled – disabling all of
   them also stops the statistics import.
-- *Spotřeba … včera* shows the last completed day the cloud has published; early in the morning it
-  may still show the day before.
+- *… consumption yesterday* shows the last completed day the cloud has published; early in the morning
+  it may still show the day before.
 
-> The 2-hour buckets are assumed to be aligned to **local** time. This was verified in summer time only
-> (CEST, where local and UTC even hours coincide). The diagnostic sensor *Konec posledního úseku
-> spotřeby* shows the end of the newest bucket – after the switch to winter time it should keep
-> showing even local hours (e.g. 14:00, not 13:00 or 15:00).
+> The 2-hour buckets are aligned to **local** time – verified in summer (CEST) and winter time (CET,
+> a hot-water heating at 02:08 landed in the 02:00–04:00 bucket). The diagnostic sensor *End of the
+> latest consumption interval* shows the end of the newest bucket.
 
 ## Dashboard example
 
@@ -121,12 +131,12 @@ appear with a delay of up to ~2.5 hours. History before the first import is not 
 
 Two gauges made with [Modern Circular Gauge](https://github.com/selvalt7/modern-circular-gauge)
 (HACS). The outer ring is the measured temperature, the **inner ring is the set-point** and its
-value is shown under the main value as *Cíl* (target):
+value is shown under the main value as *Target* (the screenshot shows the Czech labels):
 
 ```yaml
 type: custom:modern-circular-gauge
-entity: sensor.tepelne_cerpadlo_teplota_v_mistnosti
-name: Místnost
+entity: sensor.heat_pump_room_temperature
+name: Room
 min: 15
 max: 28
 unit: °C
@@ -142,9 +152,9 @@ segments:
   - from: 24
     color: [255, 152, 0]
 secondary:
-  entity: sensor.tepelne_cerpadlo_pozadovana_teplota_mistnosti
+  entity: sensor.heat_pump_room_target_temperature
   show_gauge: inner
-  label: Cíl
+  label: Target
   unit: °C
   decimals: 1
   min: 15
@@ -157,8 +167,8 @@ grid_options:
 
 ```yaml
 type: custom:modern-circular-gauge
-entity: sensor.tepelne_cerpadlo_teplota_zasobniku_tv
-name: Teplá voda
+entity: sensor.heat_pump_hot_water_tank_temperature
+name: Hot water
 min: 30
 max: 65
 unit: °C
@@ -175,9 +185,9 @@ segments:
   - from: 56
     color: [255, 152, 0]
 secondary:
-  entity: sensor.tepelne_cerpadlo_pozadovana_teplota_tv
+  entity: sensor.heat_pump_hot_water_target_temperature
   show_gauge: inner
-  label: Cíl
+  label: Target
   unit: °C
   decimals: 1
   min: 30
@@ -192,9 +202,9 @@ Real and requested flow temperature in one tile – a template helper
 (*Settings → Helpers → Template → Sensor*) with this state template:
 
 ```jinja
-{% set a = states('sensor.tepelne_cerpadlo_teplota_vystupu_topeni') %}
-{% set t = states('sensor.tepelne_cerpadlo_pozadovana_teplota_vystupu') %}
-{% if is_number(a) and is_number(t) %}{{ ('%.1f' % (a|float)) | replace('.', ',') }} °C · cíl {{ ('%.1f' % (t|float)) | replace('.', ',') }} °C{% else %}—{% endif %}
+{% set a = states('sensor.heat_pump_heating_flow_temperature') %}
+{% set t = states('sensor.heat_pump_heating_flow_setpoint') %}
+{% if is_number(a) and is_number(t) %}{{ '%.1f' % (a|float) }} °C · target {{ '%.1f' % (t|float) }} °C{% else %}—{% endif %}
 ```
 
 ## Troubleshooting
@@ -232,7 +242,8 @@ pip install aiohttp pytest pytest-asyncio
 pytest
 ```
 
-The tests cover the HA-independent parts (API client against a fake cloud, value mapping).
+The tests cover the HA-independent parts (API client against a fake cloud, value mapping, energy
+buckets) and check that every entity and enum state is translated in all languages.
 CI runs the HACS validation, hassfest and the tests on every push.
 
 Releases follow the `version` in `manifest.json` (`vX.Y.Z` tags). HACS offers updates per release.
@@ -248,4 +259,5 @@ Releases follow the `version` in `manifest.json` (`vX.Y.Z` tags). HACS offers up
 Neoficiální integrace **jen pro čtení** pro tepelná čerpadla ELCO v cloudu Remocon-Net (řízení
 GALEVO, např. AEROTOP MONO.2). Ukazuje, co čerpadlo dělá – běží, topí, odmrazuje, spínají spirály –
 a skutečné teploty výstupu, místnosti a teplé vody. Do čerpadla nic nezapisuje. Instalace přes HACS
-jako vlastní repozitář, přihlášení stejným e-mailem a heslem jako v aplikaci Remocon-Net.
+jako vlastní repozitář, přihlášení stejným e-mailem a heslem jako v aplikaci Remocon-Net. Názvy a stavy
+entit jsou česky, anglicky nebo německy podle jazyka Home Assistantu.

@@ -17,16 +17,27 @@ from .energy_values import TYPE_CH, TYPE_DHW, hourly_rows, window_start
 
 _LOGGER = logging.getLogger(__name__)
 
-# consumption type -> (statistic id suffix, name)
+# consumption type -> statistic id suffix
 STATISTICS = {
-    TYPE_CH: ("ch_electricity", "Tepelné čerpadlo – topení (elektřina)"),
-    TYPE_DHW: ("dhw_electricity", "Tepelné čerpadlo – teplá voda (elektřina)"),
+    TYPE_CH: "ch_electricity",
+    TYPE_DHW: "dhw_electricity",
+}
+# statistic names are stored in the recorder (not translatable by the frontend) -> Home Assistant language
+STATISTIC_NAMES = {
+    "cs": {TYPE_CH: "Tepelné čerpadlo – topení (elektřina)", TYPE_DHW: "Tepelné čerpadlo – teplá voda (elektřina)"},
+    "de": {TYPE_CH: "Wärmepumpe – Heizung (Strom)", TYPE_DHW: "Wärmepumpe – Warmwasser (Strom)"},
+    "en": {TYPE_CH: "Heat pump – heating (electricity)", TYPE_DHW: "Heat pump – hot water (electricity)"},
 }
 BASE_LOOKBACK = timedelta(days=60)  # how far back to look for the last known sum before the window
 
 
 def statistic_id(gateway: str, kind: int) -> str:
-    return f"{DOMAIN}:{gateway.lower()}_{STATISTICS[kind][0]}"
+    return f"{DOMAIN}:{gateway.lower()}_{STATISTICS[kind]}"
+
+
+def statistic_name(language: str | None, kind: int) -> str:
+    names = STATISTIC_NAMES.get((language or "").split("-")[0].lower(), STATISTIC_NAMES["en"])
+    return names[kind]
 
 
 async def _base_sum(hass: HomeAssistant, stat_id: str, start: datetime) -> float:
@@ -55,7 +66,7 @@ async def async_import_energy(
     metadata = StatisticMetaData(
         mean_type=StatisticMeanType.NONE,
         has_sum=True,
-        name=STATISTICS[kind][1],
+        name=statistic_name(hass.config.language, kind),
         source=DOMAIN,
         statistic_id=stat_id,
         unit_class="energy",

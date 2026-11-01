@@ -1,0 +1,202 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Remocon-Net-Konto",
+        "description": "Lesender Zugriff auf eine ELCO-Wärmepumpe über die Remocon-Net-Cloud. Verwende dieselbe E-Mail-Adresse und dasselbe Passwort wie in der Remocon-Net-App.",
+        "data": {
+          "username": "E-Mail",
+          "password": "Passwort",
+          "api_url": "API-URL"
+        }
+      },
+      "plant": {
+        "title": "Gerät auswählen",
+        "data": {
+          "gateway": "Gerät"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Erneut anmelden",
+        "description": "Gib das aktuelle Remocon-Net-Passwort für {username} ein.",
+        "data": {
+          "password": "Passwort"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
+      "cannot_connect": "Keine Verbindung zur Remocon-Net-Cloud möglich.",
+      "no_plants": "In diesem Konto wurde kein Gerät gefunden."
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits eingerichtet.",
+      "reauth_successful": "Die erneute Anmeldung war erfolgreich."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Optionen",
+        "data": {
+          "scan_interval": "Aktualisierungsintervall (Sekunden)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "hp_running": {
+        "name": "Wärmepumpe läuft"
+      },
+      "dhw_heating_rod": {
+        "name": "Heizstab Warmwasser"
+      },
+      "ch_backup_heater": {
+        "name": "Heizstab Heizung (Backup)"
+      },
+      "dhw_boost": {
+        "name": "Warmwasser-Boost"
+      },
+      "quiet_mode": {
+        "name": "Leisemodus"
+      },
+      "heat_request": {
+        "name": "Wärmeanforderung"
+      },
+      "holiday": {
+        "name": "Urlaubsmodus"
+      },
+      "weather_compensation": {
+        "name": "Witterungsgeführte Regelung"
+      },
+      "hv_input_1": {
+        "name": "HV-Eingang 1"
+      }
+    },
+    "sensor": {
+      "hp_mode": {
+        "name": "Betriebsmodus Wärmepumpe",
+        "state": {
+          "off": "Aus",
+          "standby": "Bereitschaft",
+          "cooling": "Kühlen",
+          "heating": "Heizen",
+          "heating_booster": "Heizen mit Zusatzheizung",
+          "cooling_booster": "Kühlen mit Unterstützung",
+          "test_heating": "Test-Heizbetrieb",
+          "test_cooling": "Test-Kühlbetrieb",
+          "frost_protection": "Frostschutz",
+          "defrost": "Abtauung",
+          "overheat_protection": "Überhitzungsschutz",
+          "compressor_delay": "Verdichter-Zeitschutz",
+          "system_fault": "Systemstörung",
+          "severe_system_fault": "Schwere Systemstörung",
+          "refrigerant_pump_down": "Kältemittel abpumpen",
+          "emergency": "Notbetrieb",
+          "fan_test": "Lüfter-Testlauf",
+          "cascade_heating": "Kaskaden-Heizen",
+          "cascade_cooling": "Kaskaden-Kühlen"
+        }
+      },
+      "hp_water_temperature": {
+        "name": "Wassertemperatur Wärmepumpe"
+      },
+      "ch_flow_temperature": {
+        "name": "Vorlauftemperatur Heizung"
+      },
+      "ch_flow_setpoint": {
+        "name": "Soll-Vorlauftemperatur"
+      },
+      "system_pressure": {
+        "name": "Systemdruck"
+      },
+      "outdoor_temperature": {
+        "name": "Außentemperatur"
+      },
+      "outdoor_temperature_hp": {
+        "name": "Außentemperatur (Wärmepumpe)"
+      },
+      "outdoor_temperature_online": {
+        "name": "Außentemperatur (online)"
+      },
+      "room_temperature": {
+        "name": "Raumtemperatur"
+      },
+      "room_humidity": {
+        "name": "Raumluftfeuchtigkeit"
+      },
+      "room_target_temperature": {
+        "name": "Soll-Raumtemperatur"
+      },
+      "room_comfort_temperature": {
+        "name": "Komfort-Raumtemperatur"
+      },
+      "room_economy_temperature": {
+        "name": "Absenk-Raumtemperatur"
+      },
+      "zone_mode": {
+        "name": "Zonenmodus"
+      },
+      "heating_curve_offset": {
+        "name": "Heizkurven-Verschiebung"
+      },
+      "dhw_tank_temperature": {
+        "name": "Warmwasserspeicher-Temperatur"
+      },
+      "dhw_target_temperature": {
+        "name": "Warmwasser-Solltemperatur"
+      },
+      "dhw_comfort_temperature": {
+        "name": "Warmwasser-Komforttemperatur"
+      },
+      "dhw_economy_temperature": {
+        "name": "Warmwasser-Absenktemperatur"
+      },
+      "dhw_mode": {
+        "name": "Warmwassermodus"
+      },
+      "plant_mode": {
+        "name": "Systemmodus"
+      },
+      "buffer_mode": {
+        "name": "Pufferspeicher-Modus"
+      },
+      "buffer_comfort_temperature": {
+        "name": "Puffer-Komforttemperatur"
+      },
+      "buffer_economy_temperature": {
+        "name": "Puffer-Absenktemperatur"
+      },
+      "hv_input_1_function": {
+        "name": "HV-Eingang 1 – Funktion",
+        "state": {
+          "undefined": "Nicht definiert",
+          "unused": "Nicht verwendet",
+          "edf": "EDF",
+          "sg_ready_1": "SG Ready 1",
+          "external_off": "Externe Abschaltung",
+          "pv_integration": "PV-Integration"
+        }
+      },
+      "signal_strength": {
+        "name": "Signalstärke"
+      },
+      "ch_yesterday": {
+        "name": "Verbrauch Heizung gestern"
+      },
+      "dhw_yesterday": {
+        "name": "Verbrauch Warmwasser gestern"
+      },
+      "ch_last_month": {
+        "name": "Verbrauch Heizung letzter Monat"
+      },
+      "dhw_last_month": {
+        "name": "Verbrauch Warmwasser letzter Monat"
+      },
+      "bucket_end": {
+        "name": "Ende des letzten Verbrauchsintervalls"
+      }
+    }
+  }
+}

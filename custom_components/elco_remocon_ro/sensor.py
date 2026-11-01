@@ -27,12 +27,12 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-# key, name, consumption type, period
+# key (= unique id suffix and translation key), consumption type, period
 ENERGY_SENSORS = [
-    ("ch_yesterday", "Spotřeba topení včera", TYPE_CH, PERIOD_DAYS),
-    ("dhw_yesterday", "Spotřeba TV včera", TYPE_DHW, PERIOD_DAYS),
-    ("ch_last_month", "Spotřeba topení minulý měsíc", TYPE_CH, PERIOD_MONTHS),
-    ("dhw_last_month", "Spotřeba TV minulý měsíc", TYPE_DHW, PERIOD_MONTHS),
+    ("ch_yesterday", TYPE_CH, PERIOD_DAYS),
+    ("dhw_yesterday", TYPE_DHW, PERIOD_DAYS),
+    ("ch_last_month", TYPE_CH, PERIOD_MONTHS),
+    ("dhw_last_month", TYPE_DHW, PERIOD_MONTHS),
 ]
 
 
@@ -41,11 +41,11 @@ class _EnergyEntity(CoordinatorEntity[RemoconEnergyCoordinator]):
 
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator: RemoconCoordinator, key: str, name: str) -> None:
+    def __init__(self, coordinator: RemoconCoordinator, key: str) -> None:
         assert coordinator.energy is not None
         super().__init__(coordinator.energy)
         self._attr_unique_id = f"{coordinator.gateway}_energy_{key}"
-        self._attr_name = name
+        self._attr_translation_key = key
         self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, coordinator.gateway)})
 
 
@@ -57,8 +57,8 @@ class RemoconEnergySensor(_EnergyEntity, SensorEntity):
     _attr_suggested_display_precision = 2
     _attr_icon = "mdi:lightning-bolt"
 
-    def __init__(self, coordinator: RemoconCoordinator, key: str, name: str, kind: int, period: int) -> None:
-        super().__init__(coordinator, key, name)
+    def __init__(self, coordinator: RemoconCoordinator, key: str, kind: int, period: int) -> None:
+        super().__init__(coordinator, key)
         self._kind = kind
         self._period = period
 
@@ -76,7 +76,7 @@ class RemoconBucketEndSensor(_EnergyEntity, SensorEntity):
     _attr_icon = "mdi:clock-end"
 
     def __init__(self, coordinator: RemoconCoordinator) -> None:
-        super().__init__(coordinator, "bucket_end", "Konec posledního úseku spotřeby")
+        super().__init__(coordinator, "bucket_end")
 
     @property
     def native_value(self):
@@ -90,11 +90,14 @@ class RemoconBucketEndSensor(_EnergyEntity, SensorEntity):
 
 
 class RemoconSensor(RemoconEntity, SensorEntity):
-    """Numeric or text value."""
+    """Numeric value, cloud-localized text or enum (state keys translated by Home Assistant)."""
 
     def __init__(self, coordinator: RemoconCoordinator, item: ItemDef) -> None:
         super().__init__(coordinator, item)
-        if item.device_class:
+        if item.text_map:
+            self._attr_device_class = SensorDeviceClass.ENUM
+            self._attr_options = item.options
+        elif item.device_class:
             self._attr_device_class = SensorDeviceClass(item.device_class)
         if item.state_class:
             self._attr_state_class = SensorStateClass(item.state_class)

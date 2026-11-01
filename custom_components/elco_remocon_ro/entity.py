@@ -8,7 +8,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, MANUFACTURER, SOURCE_DATA, ItemDef
+from .const import DOMAIN, MANUFACTURER, SOURCE_DATA, ItemDef, default_title
 from .coordinator import RemoconCoordinator
 from .values import is_valid, raw_for
 
@@ -23,7 +23,7 @@ class RemoconEntity(CoordinatorEntity[RemoconCoordinator]):
         self.item = item
         gw = coordinator.gateway
         self._attr_unique_id = f"{gw}_{item.source}_{item.key}_{item.zone}"
-        self._attr_name = item.name
+        self._attr_translation_key = item.translation_key
         self._attr_icon = item.icon
         self._attr_entity_registry_enabled_default = item.enabled
         if item.diagnostic:
@@ -31,7 +31,7 @@ class RemoconEntity(CoordinatorEntity[RemoconCoordinator]):
         plant = coordinator.plant
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, gw)},
-            name=coordinator.config_entry.title or "Tepelné čerpadlo",
+            name=coordinator.config_entry.title or default_title(coordinator.hass.config.language),
             manufacturer=MANUFACTURER,
             model="Remocon-Net",
             sw_version=plant.get("gwFwVer"),
@@ -56,6 +56,6 @@ class RemoconEntity(CoordinatorEntity[RemoconCoordinator]):
         attrs: dict[str, Any] = {"source": "dataItem" if self.item.source == SOURCE_DATA else "menuItem", "key": self.item.key}
         if raw.get("nodeId"):
             attrs["menu_node"] = raw["nodeId"]
-        if self.item.kind == "text" and raw.get("value") is not None:
+        if self.item.kind == "text" and raw.get("value") is not None:  # incl. values missing in the enum map
             attrs["raw_value"] = raw.get("value")
         return attrs

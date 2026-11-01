@@ -39,10 +39,27 @@ def test_binary_states():
     assert _state(337) is False
 
 
-def test_enum_texts():
-    assert _state("PlantMode") == "Zima"  # localized optTexts from the cloud
-    assert _state(340) == "Odmrazování"  # menu enum mapped to Czech
-    assert _state(303) == "Neznámý stav (77)"  # value outside the map does not crash
+def test_enum_states():
+    assert _state("PlantMode") == "Zima"  # text localized by the cloud (culture follows the HA language)
+    assert _state(340) == "defrost"  # menu enum -> state key translated by Home Assistant
+    assert _state(303) is None  # value outside the map -> unknown (raw value kept in attributes)
+
+
+def test_enum_options():
+    hp_mode = _item(340)
+    assert hp_mode.options[:4] == ["off", "standby", "cooling", "heating"]
+    assert hp_mode.options.count("defrost") == 1  # values 9 and 17 share one state
+    assert set(hp_mode.text_map.values()) == set(hp_mode.options)
+
+
+def test_culture_and_title_follow_language():
+    assert const.culture_for("de") == "de-DE"
+    assert const.culture_for("en-GB") == "en-US"
+    assert const.culture_for("cs") == "cs-CZ"
+    assert const.culture_for("fr") == "en-US"
+    assert const.culture_for(None) == "en-US"
+    assert const.default_title("de") == "Wärmepumpe"
+    assert const.default_title("pl") == "Heat pump"
 
 
 def test_numbers_and_missing():

@@ -43,5 +43,160 @@
         }
       }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "hp_running": {
+        "name": "TČ běží"
+      },
+      "dhw_heating_rod": {
+        "name": "Spirála teplé vody"
+      },
+      "ch_backup_heater": {
+        "name": "Záložní spirála topení"
+      },
+      "dhw_boost": {
+        "name": "Boost teplé vody"
+      },
+      "quiet_mode": {
+        "name": "Tichý režim"
+      },
+      "heat_request": {
+        "name": "Požadavek na teplo"
+      },
+      "holiday": {
+        "name": "Dovolená"
+      },
+      "weather_compensation": {
+        "name": "Ekvitermní regulace"
+      },
+      "hv_input_1": {
+        "name": "HV vstup 1"
+      }
+    },
+    "sensor": {
+      "hp_mode": {
+        "name": "Režim TČ",
+        "state": {
+          "off": "Vypnuto",
+          "standby": "Pohotovost",
+          "cooling": "Chlazení",
+          "heating": "Topení",
+          "heating_booster": "Topení s dohřevem",
+          "cooling_booster": "Chlazení s posilou",
+          "test_heating": "Zkušební topení",
+          "test_cooling": "Zkušební chlazení",
+          "frost_protection": "Ochrana proti mrazu",
+          "defrost": "Odmrazování",
+          "overheat_protection": "Ochrana proti přehřátí",
+          "compressor_delay": "Časová ochrana kompresoru",
+          "system_fault": "Porucha systému",
+          "severe_system_fault": "Závažná porucha systému",
+          "refrigerant_pump_down": "Odčerpání chladiva",
+          "emergency": "Nouzový režim",
+          "fan_test": "Zkušební běh ventilátoru",
+          "cascade_heating": "Kaskádové topení",
+          "cascade_cooling": "Kaskádové chlazení"
+        }
+      },
+      "hp_water_temperature": {
+        "name": "Teplota vody z TČ"
+      },
+      "ch_flow_temperature": {
+        "name": "Teplota výstupu topení"
+      },
+      "ch_flow_setpoint": {
+        "name": "Požadovaná teplota výstupu"
+      },
+      "system_pressure": {
+        "name": "Tlak v systému"
+      },
+      "outdoor_temperature": {
+        "name": "Venkovní teplota"
+      },
+      "outdoor_temperature_hp": {
+        "name": "Venkovní teplota (TČ)"
+      },
+      "outdoor_temperature_online": {
+        "name": "Venkovní teplota (online)"
+      },
+      "room_temperature": {
+        "name": "Teplota v místnosti"
+      },
+      "room_humidity": {
+        "name": "Vlhkost v místnosti"
+      },
+      "room_target_temperature": {
+        "name": "Požadovaná teplota místnosti"
+      },
+      "room_comfort_temperature": {
+        "name": "Komfortní teplota místnosti"
+      },
+      "room_economy_temperature": {
+        "name": "Útlumová teplota místnosti"
+      },
+      "zone_mode": {
+        "name": "Režim zóny"
+      },
+      "heating_curve_offset": {
+        "name": "Posun topné křivky"
+      },
+      "dhw_tank_temperature": {
+        "name": "Teplota zásobníku TV"
+      },
+      "dhw_target_temperature": {
+        "name": "Požadovaná teplota TV"
+      },
+      "dhw_comfort_temperature": {
+        "name": "Komfortní teplota TV"
+      },
+      "dhw_economy_temperature": {
+        "name": "Útlumová teplota TV"
+      },
+      "dhw_mode": {
+        "name": "Režim TV"
+      },
+      "plant_mode": {
+        "name": "Režim systému"
+      },
+      "buffer_mode": {
+        "name": "Režim akumulace"
+      },
+      "buffer_comfort_temperature": {
+        "name": "Komfortní teplota akumulace"
+      },
+      "buffer_economy_temperature": {
+        "name": "Útlumová teplota akumulace"
+      },
+      "hv_input_1_function": {
+        "name": "HV vstup 1 – funkce",
+        "state": {
+          "undefined": "Nedefinováno",
+          "unused": "Nepoužito",
+          "edf": "EDF",
+          "sg_ready_1": "SG Ready 1",
+          "external_off": "Externí vypnutí",
+          "pv_integration": "Integrace FVE"
+        }
+      },
+      "signal_strength": {
+        "name": "Síla signálu"
+      },
+      "ch_yesterday": {
+        "name": "Spotřeba topení včera"
+      },
+      "dhw_yesterday": {
+        "name": "Spotřeba TV včera"
+      },
+      "ch_last_month": {
+        "name": "Spotřeba topení minulý měsíc"
+      },
+      "dhw_last_month": {
+        "name": "Spotřeba TV minulý měsíc"
+      },
+      "bucket_end": {
+        "name": "Konec posledního úseku spotřeby"
+      }
+    }
   }
 }

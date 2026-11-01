@@ -25,7 +25,7 @@ def sensor_value(item: ItemDef, raw: dict[str, Any] | None) -> Any:
     value = raw["value"]  # type: ignore[index]
     if item.kind == "text":
         if item.text_map:
-            return item.text_map.get(int(value), f"Neznámý stav ({int(value)})")
+            return item.text_map.get(int(value))  # unknown value -> None (raw value stays in attributes)
         return item_text(raw) or str(value)  # type: ignore[arg-type]
     return value
 

@@ -29,9 +29,8 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     MIN_SCAN_INTERVAL,
+    default_title,
 )
-
-DEFAULT_TITLE = "Tepelné čerpadlo"
 
 USER_SCHEMA = vol.Schema(
     {
@@ -103,7 +102,7 @@ class RemoconConfigFlow(ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured()
         # store only what is needed - no location/address data
         return self.async_create_entry(
-            title=DEFAULT_TITLE,
+            title=default_title(self.hass.config.language),
             data={
                 CONF_USERNAME: self._user_input[CONF_USERNAME],
                 CONF_PASSWORD: self._user_input[CONF_PASSWORD],
