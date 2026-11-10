@@ -232,7 +232,11 @@ Real and requested flow temperature in one tile – a template helper
   (anonymised) results:
   ```
   python tools/probe.py --gateway <GATEWAY_ID>
+  python tools/probe.py --gateway <GATEWAY_ID> --only-menu --menu-from 1 --menu-to 1000
   ```
+  The second form reads only the service parameters. The probe first checks that the cloud
+  answers menuItems for the plant at all, and it saves what it has read even when it stops early
+  (`--max-calls`, HTTP 429, Ctrl+C).
   The probe output contains account and location data – **do not publish it as is**.
 
 ## Development
