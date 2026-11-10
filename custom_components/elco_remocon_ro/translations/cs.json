@@ -31,7 +31,8 @@
     },
     "abort": {
       "already_configured": "Toto zařízení už je nastavené.",
-      "reauth_successful": "Přihlášení bylo obnoveno."
+      "reauth_successful": "Přihlášení bylo obnoveno.",
+      "unsupported_system": "Tato integrace podporuje jen zařízení ELCO na platformě GALEVO (např. AEROTOP MONO). Zařízení v tomto účtu je typu {system}, které cloud Remocon-Net poskytuje jiným způsobem. Pro zařízení BSB (adresa v portálu obsahuje /R2/BsbPlantDashboard/) zkuste integraci elco-aerotop: {bsb_url}"
     }
   },
   "options": {

@@ -85,3 +85,13 @@ def test_data_item_request_per_zone():
 def test_unique_ids_unique():
     keys = [(i.source, i.key, i.zone) for i in const.ITEMS]
     assert len(keys) == len(set(keys))
+
+
+def test_supported_plant():
+    """Only GALEVO plants are set up; BSB plants (gwSysType 5) answer neither menuItems nor most dataItems."""
+    assert const.is_supported_plant({"gwId": "A", "gwSysType": 3})
+    assert const.is_supported_plant({"gwId": "A"})  # not reported -> do not block
+    assert not const.is_supported_plant({"gwId": "B", "gwSysType": 5})
+    assert not const.is_supported_plant({"gwId": "C", "gwSysType": 1})
+    assert const.sys_type_name({"gwSysType": 5}) == "BSB"
+    assert const.sys_type_name({"gwSysType": 7}) == "type 7"

@@ -22,6 +22,7 @@ from homeassistant.helpers.selector import (
 
 from .api import DEFAULT_API_URL, RemoconApi, RemoconAuthError, RemoconError
 from .const import (
+    BSB_INTEGRATION_URL,
     CONF_API_URL,
     CONF_GATEWAY,
     CONF_PLANT_NAME,
@@ -30,6 +31,8 @@ from .const import (
     DOMAIN,
     MIN_SCAN_INTERVAL,
     default_title,
+    is_supported_plant,
+    sys_type_name,
 )
 
 USER_SCHEMA = vol.Schema(
@@ -73,10 +76,20 @@ class RemoconConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             plants, errors = await self._login(user_input)
             if not errors:
+                supported = [p for p in plants if is_supported_plant(p)]
+                if not supported:
+                    # e.g. BSB plants: the cloud offers them a different API, nothing here would work
+                    return self.async_abort(
+                        reason="unsupported_system",
+                        description_placeholders={
+                            "system": ", ".join(sorted({sys_type_name(p) for p in plants})),
+                            "bsb_url": BSB_INTEGRATION_URL,
+                        },
+                    )
                 self._user_input = user_input
-                self._plants = plants
-                if len(plants) == 1:
-                    return await self._create(plants[0])
+                self._plants = supported
+                if len(supported) == 1:
+                    return await self._create(supported[0])
                 return await self.async_step_plant()
         return self.async_show_form(
             step_id="user", data_schema=self.add_suggested_values_to_schema(USER_SCHEMA, user_input), errors=errors

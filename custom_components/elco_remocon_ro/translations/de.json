@@ -31,7 +31,8 @@
     },
     "abort": {
       "already_configured": "Dieses Gerät ist bereits eingerichtet.",
-      "reauth_successful": "Die erneute Anmeldung war erfolgreich."
+      "reauth_successful": "Die erneute Anmeldung war erfolgreich.",
+      "unsupported_system": "Diese Integration unterstützt nur ELCO-Anlagen der GALEVO-Plattform (z. B. AEROTOP MONO). Die Anlage in diesem Konto ist eine {system}-Anlage, die die Remocon-Net-Cloud auf andere Weise bereitstellt. Für BSB-Anlagen (die Portal-Adresse enthält /R2/BsbPlantDashboard/) probieren Sie die Integration elco-aerotop: {bsb_url}"
     }
   },
   "options": {

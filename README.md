@@ -36,8 +36,11 @@ anything to the heat pump.**
 - Home Assistant **2025.11** or newer (the brand icon is shown from **2026.3**)
 - ELCO heat pump with a Remocon-Net gateway on the **GALEVO** platform – in the
   [Remocon-Net portal](https://www.remocon-net.remotethermo.com) the plant URL contains
-  `/R2/Plant/Index/`. Plants with `/R2/BsbPlantDashboard/` (BSB family) are **not** supported
-  (see [thomasgregg/elco-aerotop](https://github.com/thomasgregg/elco-aerotop) for those).
+  `/R2/Plant/Index/`. Plants with `/R2/BsbPlantDashboard/` (BSB family, e.g. *AQUATOP S* with an
+  RVS controller) are **not** supported (see [thomasgregg/elco-aerotop](https://github.com/thomasgregg/elco-aerotop)
+  for those). The cloud offers BSB plants a different API: the numbered menuItems are rejected and
+  only a couple of named values are returned. The config flow checks the platform (`gwSysType`
+  3 = GALEVO, 5 = BSB) and stops with an explanation for other platforms.
 
 ## Installation
 

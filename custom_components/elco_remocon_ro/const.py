@@ -21,6 +21,13 @@ CULTURES = {"cs": "cs-CZ", "de": "de-DE", "en": "en-US"}
 DEFAULT_CULTURE = "en-US"
 DEFAULT_TITLES = {"cs": "Tepelné čerpadlo", "de": "Wärmepumpe", "en": "Heat pump"}
 
+# plant platform ("gwSysType" in remote/plants/lite, same numbering as python-ariston-api SystemType).
+# Only GALEVO plants answer the named dataItems and numbered menuItems this integration reads;
+# BSB plants (e.g. AQUATOP S with an RVS controller) reject menuItems and return almost no dataItems.
+SYS_TYPE_GALEVO = 3
+SYS_TYPES = {1: "GALILEO 1", 2: "GALILEO 2", 3: "GALEVO", 4: "VELIS", 5: "BSB"}
+BSB_INTEGRATION_URL = "https://github.com/thomasgregg/elco-aerotop"
+
 SOURCE_DATA = "di"  # named dataItems (remote/dataItems/{gw}/get)
 SOURCE_MENU = "mi"  # numbered menuItems (menuItems/{gw}?menuItems=...)
 
@@ -146,6 +153,18 @@ def culture_for(language: str | None) -> str:
 def default_title(language: str | None) -> str:
     """Default device / config entry name in the Home Assistant language."""
     return DEFAULT_TITLES.get((language or "").split("-")[0].lower(), DEFAULT_TITLES["en"])
+
+
+def is_supported_plant(plant: dict) -> bool:
+    """True for a GALEVO plant; a plant without gwSysType is accepted (not reported by the cloud)."""
+    sys_type = plant.get("gwSysType")
+    return sys_type is None or sys_type == SYS_TYPE_GALEVO
+
+
+def sys_type_name(plant: dict) -> str:
+    """Platform name of a plant for messages, e.g. "BSB" or "type 7" when unknown."""
+    sys_type = plant.get("gwSysType")
+    return SYS_TYPES.get(sys_type, f"type {sys_type}")  # type: ignore[arg-type]
 
 
 def data_item_request(zones: list[int]) -> list[dict[str, int | str]]:
