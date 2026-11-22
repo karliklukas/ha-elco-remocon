@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .api import RemoconApi, RemoconAuthError, RemoconError, RemoconRateLimited
+from .backoff import Backoff
 from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
@@ -36,7 +37,7 @@ from .energy_values import (
 
 _LOGGER = logging.getLogger(__name__)
 
-MAX_TOLERATED_FAILURES = 3  # failed polls in a row that still show the previous values (~6 min at 120 s)
+MAX_TOLERATED_FAILURES = 3  # failed polls in a row that still show the previous values (~9 min at 180 s)
 
 
 @dataclass
@@ -117,6 +118,8 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
         self.features: dict[str, Any] | None = None
         self.plant: dict[str, Any] = {}
         self._failures = 0  # consecutive failed updates
+        self._base_interval = timedelta(seconds=interval)
+        self._backoff = Backoff()
         self.energy: RemoconEnergyCoordinator | None = None  # set in __init__.py when the plant has metering
 
     @property
@@ -135,28 +138,44 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
             raise UpdateFailed(str(err)) from err
         self.plant = next((p for p in plants if p.get("gwId") == self.gateway), {})
 
+    def _apply_backoff(self, rate_limited: bool) -> None:
+        """Lengthen the update interval after a 429, shorten it again after a run of good polls."""
+        before = self._backoff.factor
+        if rate_limited:
+            self._backoff.rate_limited()
+        else:
+            self._backoff.success()
+        if self._backoff.factor != before:
+            self.update_interval = self._base_interval * self._backoff.factor
+            _LOGGER.info(
+                "Cloud rate limit: update interval %s s (%sx)",
+                int(self.update_interval.total_seconds()),
+                self._backoff.factor,
+            )
+
     async def _async_update_data(self) -> RemoconData:
+        rate_limited = False
         try:
             data_items = await self.api.get_data_items(
                 self.gateway, self.features or {}, data_item_request(self.zones), culture_for(self.hass.config.language)
             )
             try:
                 menu_items = await self.api.get_menu_items(self.gateway, MENU_IDS)
-            except RemoconRateLimited:
-                raise
             except RemoconAuthError:
                 raise
             except RemoconError as err:
-                # menuItems are fragile (one unsupported number -> HTTP 500); keep the last values
+                # menuItems are fragile (one unsupported number -> HTTP 500) and also rate limited;
+                # keep their last values but use the fresh dataItems
+                rate_limited = isinstance(err, RemoconRateLimited)
                 _LOGGER.warning("Reading menuItems failed, keeping previous values: %s", err)
                 menu_items = self.data.menu_items if self.data else {}
         except RemoconAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
-        except RemoconRateLimited as err:
-            raise UpdateFailed(f"Cloud rate limit (HTTP 429): {err}") from err
         except RemoconError as err:
-            # the gateway sometimes fails a single read ("Gateway error ... InternalError");
-            # keep showing the last values for a few polls instead of making everything unavailable
+            # the gateway sometimes fails a single read ("Gateway error ... InternalError") and the cloud
+            # rate limits the account (HTTP 429); keep showing the last values for a few polls
+            # instead of making everything unavailable
+            self._apply_backoff(isinstance(err, RemoconRateLimited))
             self._failures += 1
             if self.data is not None and self._failures <= MAX_TOLERATED_FAILURES:
                 _LOGGER.warning(
@@ -164,5 +183,6 @@ class RemoconCoordinator(DataUpdateCoordinator[RemoconData]):
                 )
                 return self.data
             raise UpdateFailed(str(err)) from err
+        self._apply_backoff(rate_limited)
         self._failures = 0
         return RemoconData(data_items=data_items, menu_items=menu_items)

@@ -47,7 +47,7 @@ class FakeCloud:
             self.gateway_errors -= 1
             return web.Response(status=500, text=":-( Gateway error from GW1 (Response code: InternalError)")
         if self.rate_limit:
-            return web.Response(status=429, text="slow down")
+            return web.Response(status=429, text="slow down", headers={"Retry-After": "600"})
         if self.expire_next or not self._authorized(request):
             self.expire_next = False
             return web.Response(status=405)
@@ -119,5 +119,8 @@ async def test_menu_server_error_and_rate_limit(cloud):
     with pytest.raises(api.RemoconError):
         await client.get_menu_items("GW1", [348])
     fake.rate_limit = True
-    with pytest.raises(api.RemoconRateLimited):
+    with pytest.raises(api.RemoconRateLimited) as exc:
         await client.get_data_items("GW1", {}, [{"id": "IsHeatingPumpOn", "zn": 0}], "cs-CZ")
+    # the log shows which call was blocked and how long the cloud wants us to wait
+    assert "POST remote/dataItems/GW1/get" in str(exc.value)
+    assert "Retry-After: 600" in str(exc.value)

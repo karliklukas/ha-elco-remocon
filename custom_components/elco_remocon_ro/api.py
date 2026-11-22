@@ -69,7 +69,11 @@ class RemoconApi:
             ) as resp:
                 text = await resp.text()
                 if resp.status == 429:
-                    raise RemoconRateLimited(text[:200])
+                    retry_after = resp.headers.get("Retry-After")
+                    raise RemoconRateLimited(
+                        f"{method} {path.split('?')[0]}: {text[:200]}"
+                        + (f" (Retry-After: {retry_after})" if retry_after else "")
+                    )
                 data: Any = None
                 if text:
                     try:

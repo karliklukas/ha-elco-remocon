@@ -30,6 +30,8 @@ anything to the heat pump.**
   (other languages fall back to English)
 - Robust polling: a failed gateway read is retried once and the last values are kept for up to
   3 failed polls in a row, so short cloud hiccups do not make everything *unavailable*
+- Rate limit aware: when the cloud answers *HTTP 429 – Requests are blocked*, the update interval
+  is doubled (up to 8×) and shortened again step by step after 10 good polls
 
 ## Requirements
 
@@ -65,7 +67,7 @@ Copy `custom_components/elco_remocon_ro` into `<config>/custom_components/` and 
 
 | Option | Default | Notes |
 |---|---|---|
-| Update interval | 120 s | 60–3600 s. One update = 2 cloud requests; each reads live data from the gateway (~10 s). |
+| Update interval | 180 s | 60–3600 s. One update = 2 cloud requests; each reads live data from the gateway (~10 s). Since November 2026 the cloud limits the number of requests per account – at 120 s every fifth update was blocked (HTTP 429). The Remocon app and other integrations using the same account count towards the same limit. |
 
 ## Entities
 

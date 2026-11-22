@@ -12,7 +12,8 @@ CONF_GATEWAY = "gateway"
 CONF_PLANT_NAME = "plant_name"
 CONF_SCAN_INTERVAL = "scan_interval"
 
-DEFAULT_SCAN_INTERVAL = 120  # seconds
+# seconds; since 2026-11 the cloud blocks an account polling 2 requests / 120 s every few minutes (HTTP 429)
+DEFAULT_SCAN_INTERVAL = 180
 ENERGY_SCAN_INTERVAL = 30 * 60  # consumption reports change every 2 hours
 MIN_SCAN_INTERVAL = 60
 # the cloud localizes dataItems enum texts by "culture"; follow the Home Assistant language
